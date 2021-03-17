@@ -87,10 +87,8 @@ http.createServer(async function (req, res) {
       
     if(url ==='/api/v1/getdata') { 
         const a = await getData();
-        console.log(a);
-        // res.write(await getData());  
+        // console.log(a);
         res.write(JSON.stringify(a));
-
         res.end();  
     } 
     else if(url ==='/contact') { 
