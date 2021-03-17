@@ -14,27 +14,31 @@ const conn = mysql.createConnection({
 // node native promisify
 const query = util.promisify(conn.query).bind(conn);
 
-const getTicket = () => {    
+const getTableList = () => {    
     try {
         return new Promise(async (resolve) => {
             const rows = await query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA='ticket'");
-            // console.log(rows);
-            const rows_2_arr = await Promise.all(
-                rows.map(async (row) => {
-                    const conn_2 = mysql.createConnection({
-                        host     : "localhost",
-                        user     : "root",
-                        password : "",
-                    });
-                    const query_2 = util.promisify(conn_2.query).bind(conn_2);
-                    let rows_2 = await query_2("SELECT symbol, GROUP_CONCAT(DISTINCT tweetText SEPARATOR ',') AS total_tweet FROM ticket.`" + row["TABLE_NAME"] + "` WHERE UNIX_TIMESTAMP() - createdDateUnix < 86400*2 GROUP BY symbol ORDER BY symbol");
+            resolve(rows);
+        });
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const getTickets = () => {    
+    try {
+        return new Promise(async (resolve) => {
+            let tables = await getTableList();
+            const tickets = await Promise.all(
+                tables.map(async (table) => {
+                    let rows = await query("SELECT symbol, GROUP_CONCAT(DISTINCT tweetText SEPARATOR ',') AS total_tweet FROM ticket.`" + table["TABLE_NAME"] + "` WHERE UNIX_TIMESTAMP() - createdDateUnix < 86400*2 GROUP BY symbol ORDER BY symbol");
                     
-                    return rows_2;
+                    return rows;
                 })
 
             );
-
-            resolve(rows_2_arr);
+            // console.log(tickets);
+            resolve(tickets);
         });
     } catch(err) {
         console.log(err);
@@ -43,7 +47,7 @@ const getTicket = () => {
 
 const getData = () => {    
     return new Promise(async (resolve) => {
-        let tickets = await getTicket();
+        let tickets = await getTickets();
         let results = {};
         tickets.forEach(account_ticket => {
             account_ticket.forEach(ticket => {
@@ -118,7 +122,8 @@ const a = (async () => {
     console.log(a);
     return;
 })();
-// getData();
+getData();
+// getTicket();
 
 http.createServer(async function (req, res) { 
       
