@@ -8,6 +8,8 @@ var connection = mysql.createConnection({
     password : "",
 });
 
+let tickets = {}
+
 connection.connect( function(err) {
     if (err) {
         console.error("Error connecting: " + err.stack);
@@ -40,12 +42,23 @@ connection.query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_S
             subRsults.forEach(subRsult => {
                 var sentiment_result = sentiment.analyze(subRsult["total_tweet"]);
                 console.log("----- " + subRsult["symbol"] + ": " + sentiment_result["comparative"] + " -----");
-                // console.log(sentiment_result);
+                addTicket(subRsult["symbol"], sentiment_result["comparative"]);
+                // console.log(tickets);
             });
         });
         temp_connection.end();
     });
+    console.log(tickets);
+    
 });
+
+function addTicket(ss,senti_) {
+    if ( tickets[ss] == undefined ) {
+        tickets[ss] = [senti_]
+    } else {
+        tickets[ss].push(senti_);
+    }
+}
 
 
 connection.end();
