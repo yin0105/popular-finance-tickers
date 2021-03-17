@@ -44,14 +44,14 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = populateVoiceList;
 }
 
-function speak(){
+function speak(text){
     console.log("speak");
     // if (synth.speaking) {
     //     console.error('speechSynthesis.speaking');
     //     return;
     // }
     // if (inputTxt.value !== '') {
-    var utterThis = new SpeechSynthesisUtterance("Hello, Mickey");
+    var utterThis = new SpeechSynthesisUtterance(text);
     utterThis.onend = function (event) {
         console.log('SpeechSynthesisUtterance.onend');
     }

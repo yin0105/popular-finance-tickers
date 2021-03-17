@@ -13,6 +13,8 @@ const conn = mysql.createConnection({
 
 // node native promisify
 const query = util.promisify(conn.query).bind(conn);
+let pre_sorted_results = {}
+let new_symbol = []
 
 const getTableList = () => {    
     try {
@@ -79,6 +81,23 @@ const getData = () => {
             sorted_results[items[i][0]] = results[items[i][0]];
         }
         // Added part end
+        new_symbol = []
+        if (pre_sorted_results.length != 0) {
+            for (row in sorted_results) {
+                console.log("row = " + row);
+                if (!(row in pre_sorted_results)) {
+                    new_symbol.push(row);
+                }
+            }
+        }
+        pre_sorted_results = {}
+        for (row in sorted_results) {
+            pre_sorted_results[row] = sorted_results[row];
+        }
+        console.log("pre_sorted_results = ");
+        console.log(pre_sorted_results);
+        console.log("new_symbol = ");
+        console.log(new_symbol);
 
         let options_data = [];
         let options_color = [];
@@ -120,7 +139,8 @@ const getData = () => {
                     "distributed": true,
                     "enableShades": false
                 }
-            }
+            },
+            "new_symbol": "KERN, DDD, CRON"//new_symbol,
         };
 
         resolve(options);
@@ -141,7 +161,7 @@ const a = (async () => {
     console.log(a);
     return;
 })();
-getData();
+// getData();
 // getTicket();
 
 http.createServer(async function (req, res) { 
