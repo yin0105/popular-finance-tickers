@@ -1,4 +1,7 @@
+var Sentiment = require('sentiment')
+var sentiment = new Sentiment();
 var mysql      = require("mysql");
+
 var connection = mysql.createConnection({
     host     : "localhost",
     user     : "root",
@@ -6,23 +9,19 @@ var connection = mysql.createConnection({
 });
 
 connection.connect( function(err) {
-    console.log("connection.connect");
     if (err) {
         console.error("Error connecting: " + err.stack);
         return;
     }
 
-    console.log("Connected as id " + connection.threadId);
 });
 
 connection.query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA='ticket'",  function (error, results, fields) {
-    console.log("connection.query");
     if (error)
         throw error;
 
     let now = Date.now();
     results.forEach(result => {
-        console.log("SELECT * FROM ticket.`" + result["TABLE_NAME"] + "`");
         var temp_connection = mysql.createConnection({
             host     : "localhost",
             user     : "root",
@@ -39,7 +38,9 @@ connection.query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_S
                 throw subError;
 
             subRsults.forEach(subRsult => {
-                console.log(subRsult["total_tweet"]);
+                var sentiment_result = sentiment.analyze(subRsult["total_tweet"]);
+                console.log("----- " + subRsult["symbol"] + ": " + sentiment_result["comparative"] + " -----");
+                // console.log(sentiment_result);
             });
         });
         temp_connection.end();
