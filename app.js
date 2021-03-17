@@ -22,7 +22,7 @@ connection.query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_S
     if (error)
         throw error;
 
-    let now = Date.now();
+    // let now = Date.now();
     results.forEach(result => {
         var temp_connection = mysql.createConnection({
             host     : "localhost",
