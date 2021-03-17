@@ -26,7 +26,14 @@ const getTicket = () => {
                         password : "",
                     });
                     const query_2 = util.promisify(conn_2.query).bind(conn_2);
-                    const rows_2 = await query_2("SELECT symbol, GROUP_CONCAT(DISTINCT tweetText SEPARATOR ',') AS total_tweet FROM ticket.`" + row["TABLE_NAME"] + "` WHERE UNIX_TIMESTAMP() - createdDateUnix < 86400*2 GROUP BY symbol ORDER BY symbol");
+                    const rows_2;
+                    try {
+                        rows_2 = await query_2("SELECT symbol, GROUP_CONCAT(DISTINCT tweetText SEPARATOR ',') AS total_tweet FROM ticket.`" + row["TABLE_NAME"] + "` WHERE UNIX_TIMESTAMP() - createdDateUnix < 86400*2 GROUP BY symbol ORDER BY symbol");
+                    } catch (err) {
+                        console.log(err);
+                    }
+                    
+                        
                     
                     return rows_2;
                 })

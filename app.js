@@ -2,6 +2,7 @@ const mysql = require('mysql'); // or use import if you use TS
 const util = require('util');
 const Sentiment = require('sentiment')
 const http = require('http'); 
+const fs = require('fs');
 
 const sentiment = new Sentiment();
 const conn = mysql.createConnection({
@@ -26,7 +27,7 @@ const getTicket = () => {
                         password : "",
                     });
                     const query_2 = util.promisify(conn_2.query).bind(conn_2);
-                    const rows_2 = await query_2("SELECT symbol, GROUP_CONCAT(DISTINCT tweetText SEPARATOR ',') AS total_tweet FROM ticket.`" + row["TABLE_NAME"] + "` WHERE UNIX_TIMESTAMP() - createdDateUnix < 86400*2 GROUP BY symbol ORDER BY symbol");
+                    let rows_2 = await query_2("SELECT symbol, GROUP_CONCAT(DISTINCT tweetText SEPARATOR ',') AS total_tweet FROM ticket.`" + row["TABLE_NAME"] + "` WHERE UNIX_TIMESTAMP() - createdDateUnix < 86400*2 GROUP BY symbol ORDER BY symbol");
                     
                     return rows_2;
                 })
@@ -58,7 +59,48 @@ const getData = () => {
             results[symbol] = {"mentions": results[symbol].length, "senti": sum / results[symbol].length};
         }
 
-        resolve(results);
+        let options_data = [];
+        let options_color = [];
+        for (symbol in results) {
+            options_data_elem = {
+                "x": symbol,
+                "y": results[symbol]["mentions"]
+            }
+            options_data.push(options_data_elem);
+            if (results[symbol]["senti"] > 0 ) {
+                options_color.push('#0000FF');
+            } else {
+                options_color.push('#00FF00');
+            }
+        }
+
+        let options = {
+            "series": [
+                {
+                    "data": options_data
+                }
+            ],
+            "legend": {
+                "show": false
+            },
+            "chart": {
+                "height": 500,
+                "type": "treemap"
+            },
+            "title": {
+                "text": "How popular finance tickers are",
+                "align": "center"
+            },
+            "colors": options_color,
+            "plotOptions": {
+                "treemap": {
+                    "distributed": true,
+                    "enableShades": false
+                }
+            }
+        };
+
+        resolve(options);
     })
     // console.log(results);
 }
@@ -81,25 +123,57 @@ const a = (async () => {
 http.createServer(async function (req, res) { 
       
     // http header 
-    res.writeHead(200, {'Content-Type': 'text/html'});  
+     
       
     var url = req.url; 
-      
-    if(url ==='/api/v1/getdata') { 
-        const a = await getData();
-        // console.log(a);
-        res.write(JSON.stringify(a));
-        res.end();  
-    } 
-    else if(url ==='/contact') { 
-        res.write(' Welcome to contact us page');  
-        res.end();  
-    } 
-    else { 
-        res.write('Hello World!');  
-        res.end();  
-    } 
-}).listen(3000, function() { 
+    // res.write(url);
+    // res.write("##########") ;
+    // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4090');
+    // if (url ==='/') {
+    //     res.writeHead(200, {
+    //         'Content-Type': 'text/html', 
+    //         'Access-Control-Allow-Origin':'*',
+    //         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+    //         'Access-Control-Allow-Headers': 'X-Requested-With,content-type',
+    //         'Access-Control-Allow-Credentials': true
+    //     });
+    //     fs.readFile('./index.html', null, function (error, data) {
+    //         if (error) {
+    //             res.writeHead(404);
+    //             res.write('Whoops! File not found!');
+    //         } else {
+    //             res.write(data);
+    //         }
+    //         res.end();
+    //     });
+    // } else {
+        res.writeHead(200, {
+            'Content-Type': 'application/json', 
+            'Access-Control-Allow-Origin':'*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+            'Access-Control-Allow-Headers': 'X-Requested-With,content-type',
+            'Access-Control-Allow-Credentials': true
+        });
+        if(url.startsWith('/api/v1/getdata')) {
+            try {
+                const a = await getData();
+                // console.log(a);
+                res.write(JSON.stringify(a));
+                res.end();  
+            } catch (err) {
+                console.log(err);
+            }
+        } else if(url ==='/contact') { 
+            res.write(' Welcome to contact us page');  
+            res.end();  
+        } else { 
+            res.write('Hello World!');  
+            res.end();  
+        } 
+
+    // }
+        
+}).listen(4090, function() { 
       
     // The server object listens on port 3000 
     console.log("server start at port 3000"); 
