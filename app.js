@@ -63,20 +63,39 @@ const getData = () => {
             results[symbol] = {"mentions": results[symbol].length, "senti": sum / results[symbol].length};
         }
 
+        console.log(results);
+        // Added part begin
+        var items = Object.keys(results).map(function(key) {
+            return [key, results[key]["mentions"]];
+        });
+        
+        items.sort(function(first, second) {
+            return second[1] - first[1];
+        });
+        
+        // console.log(items);
+        sorted_results = {};
+        for (i in items) {
+            sorted_results[items[i][0]] = results[items[i][0]];
+        }
+        // Added part end
+
         let options_data = [];
         let options_color = [];
-        for (symbol in results) {
+
+        for (symbol in sorted_results) {
             options_data_elem = {
                 "x": symbol,
-                "y": results[symbol]["mentions"]
+                "y": sorted_results[symbol]["mentions"]
             }
             options_data.push(options_data_elem);
-            if (results[symbol]["senti"] > 0 ) {
+            if (sorted_results[symbol]["senti"] < 0 ) {
                 options_color.push('#0000FF');
             } else {
                 options_color.push('#00FF00');
             }
         }
+        
 
         let options = {
             "series": [
@@ -162,7 +181,7 @@ http.createServer(async function (req, res) {
         if(url.startsWith('/api/v1/getdata')) {
             try {
                 const a = await getData();
-                // console.log(a);
+                console.log(a);
                 res.write(JSON.stringify(a));
                 res.end();  
             } catch (err) {
