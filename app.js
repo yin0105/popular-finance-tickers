@@ -4,8 +4,6 @@ var connection = mysql.createConnection({
     user     : "root",
     password : "",
 });
-let aaa = "aaaa";
-let account_names = [];
 
 connection.connect( function(err) {
     console.log("connection.connect");
@@ -22,7 +20,8 @@ connection.query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_S
     if (error)
         throw error;
 
-     results.forEach(result => {
+    let now = Date.now();
+    results.forEach(result => {
         console.log("SELECT * FROM ticket.`" + result["TABLE_NAME"] + "`");
         var temp_connection = mysql.createConnection({
             host     : "localhost",
@@ -34,19 +33,18 @@ connection.query("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_S
                 return;
             }
         });
-        temp_connection.query("SELECT * FROM ticket.`" + result["TABLE_NAME"] + "`", function (subError, subRsults, subFields) {
+        
+        temp_connection.query("SELECT symbol, GROUP_CONCAT(DISTINCT tweetText SEPARATOR ',') AS total_tweet FROM ticket.`" + result["TABLE_NAME"] + "` WHERE UNIX_TIMESTAMP() - createdDateUnix < 86400*2 GROUP BY symbol ORDER BY symbol", function (subError, subRsults, subFields) {
             if (subError)
                 throw subError;
 
             subRsults.forEach(subRsult => {
-                console.log(subRsult);
+                console.log(subRsult["total_tweet"]);
             });
         });
         temp_connection.end();
     });
-    console.log(account_names);
 });
 
-console.log(aaa);
 
 connection.end();
