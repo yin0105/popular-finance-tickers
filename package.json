@@ -1,0 +1,27 @@
+{
+  "name": "finance-ticker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "http": "0.0.1-security",
+    "mysql": "^2.18.1",
+    "sentiment": "^5.0.2",
+    "util": "^0.12.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solutionLi/popular-finance-tickers.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/solutionLi/popular-finance-tickers/issues"
+  },
+  "homepage": "https://github.com/solutionLi/popular-finance-tickers#readme"
+}
