@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="referrer" content="origin">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <div class="main">
+            <!-- <button onclick="speak('displayed KERN, DDD, CRON')">Play</button> -->
+            <div class="chart" id="chart" style="width: 1000px; height: 900px; background-color: azure;">
+
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <script>
+            var options = {
+                series: [
+                    {
+                        data: [
+                            {
+                                x: 'New Delhi',
+                                y: 218
+                            },
+                            {
+                                x: 'Kolkata',
+                                y: 149
+                            },
+                            {
+                                x: 'Mumbai',
+                                y: 184
+                            },
+                            {
+                                x: 'Ahmedabad',
+                                y: 55
+                            },
+                            {
+                                x: 'Bangaluru',
+                                y: 84
+                            },
+                            {
+                                x: 'Pune',
+                                y: 31
+                            },
+                            {
+                                x: 'Chennai',
+                                y: 70
+                            },
+                            {
+                                x: 'Jaipur',
+                                y: 30
+                            },
+                            {
+                                x: 'Surat',
+                                y: 44
+                            },
+                            {
+                                x: 'Hyderabad',
+                                y: 68
+                            },
+                            {
+                                x: 'Lucknow',
+                                y: 28
+                            },
+                            {
+                                x: 'Indore',
+                                y: 19
+                            },
+                            {
+                                x: 'Kanpur',
+                                y: 29
+                            }
+                        ]
+                    }
+                ],
+                legend: {
+                    show: false
+                },
+                chart: {
+                    height: 800,
+                    type: 'treemap'
+                },
+                title: {
+                    text: 'Distibuted Treemap (different color for each cell)',
+                    align: 'center'
+                },
+                colors: [
+                    '#3B93A5',
+                    '#F7B844',
+                    '#ADD8C7',
+                    '#EC3C65',
+                    '#CDD7B6',
+                    '#C1F666',
+                    '#D43F97',
+                    '#1E5D8C',
+                    '#421243',
+                    '#7F94B0',
+                    '#EF6537',
+                    '#C0ADDB'
+                ],
+                plotOptions: {
+                    treemap: {
+                        distributed: true,
+                        enableShades: false
+                    }
+                }
+            };
+
+            // var chart = new ApexCharts(document.querySelector("#chart"), options);
+            // chart.render();
+        </script>
+        <script>
+            function get_data() {
+                $.ajax({
+					url: "http://localhost:4090/api/v1/getdata",
+					type: "GET",
+					crossDomain: true,
+                    dataType: 'json',
+			
+					success: function (options) {
+                        $("#chart") .text("");
+						var chart = new ApexCharts(document.querySelector("#chart"), options);
+                        chart.render();
+                        console.log("###########");
+                        console.log(options);
+                        console.log(options.new_symbol);
+                        console.log("###########");
+                        if (options.new_symbol != "") {
+                            var text = "displayed " + options.new_symbol;
+                            console.log("text = " + text);
+                            speak(text);
+                        }
+
+					},
+					error: function (error) {
+						console.log("Error");
+					}       
+				});
+            }
+
+            var myVar = setInterval(get_data, 10000);
+        </script>
+        <script src="speech.js"></script>
+    </body>
+</html>
