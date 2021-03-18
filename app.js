@@ -33,13 +33,11 @@ const getTickets = () => {
             let tables = await getTableList();
             const tickets = await Promise.all(
                 tables.map(async (table) => {
-                    let rows = await query("SELECT symbol, GROUP_CONCAT(DISTINCT tweetText SEPARATOR ',') AS total_tweet FROM ticket.`" + table["TABLE_NAME"] + "` WHERE UNIX_TIMESTAMP() - createdDateUnix < 86400*2 GROUP BY symbol ORDER BY symbol");
-                    
+                    let rows = await query("SELECT symbol, GROUP_CONCAT(DISTINCT tweetText SEPARATOR ',') AS total_tweet FROM ticket.`" + table["TABLE_NAME"] + "` WHERE UNIX_TIMESTAMP() - createdDateUnix < 86400*1 GROUP BY symbol ORDER BY symbol");
                     return rows;
                 })
 
             );
-            // console.log(tickets);
             resolve(tickets);
         });
     } catch(err) {
@@ -65,7 +63,6 @@ const getData = () => {
             results[symbol] = {"mentions": results[symbol].length, "senti": sum / results[symbol].length};
         }
 
-        console.log(results);
         // Added part begin
         var items = Object.keys(results).map(function(key) {
             return [key, results[key]["mentions"]];
@@ -84,7 +81,6 @@ const getData = () => {
         new_symbol = []
         if (pre_sorted_results.length != 0) {
             for (row in sorted_results) {
-                console.log("row = " + row);
                 if (!(row in pre_sorted_results)) {
                     new_symbol.push(row);
                 }
@@ -94,10 +90,6 @@ const getData = () => {
         for (row in sorted_results) {
             pre_sorted_results[row] = sorted_results[row];
         }
-        console.log("pre_sorted_results = ");
-        console.log(pre_sorted_results);
-        console.log("new_symbol = ");
-        console.log(new_symbol);
 
         let options_data = [];
         let options_color = [];
@@ -145,7 +137,6 @@ const getData = () => {
 
         resolve(options);
     })
-    // console.log(results);
 }
 
 function addTicket(tt, ss,senti_) {
